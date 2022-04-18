@@ -6,5 +6,6 @@ data class UserDetails(
      val id : Long,
      val name: String,
      @SerializedName("images")
-     val userPhoto : List<String>
+     val userPhoto : List<String>,
+     val page : String
 )

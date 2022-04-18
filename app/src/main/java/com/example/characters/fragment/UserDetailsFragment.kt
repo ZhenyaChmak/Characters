@@ -49,8 +49,11 @@ class UserDetailsFragment : Fragment() {
                 ) {
                     if(response.isSuccessful){
                         val detailsUser = response.body() ?: return
-                        binding.nameDetails.text = detailsUser.name
-                        binding.userPhotoDetails.load(detailsUser.userPhoto[0])
+                        with(binding) {
+                            nameDetails.text = detailsUser.name
+                            userPhotoDetails.load(detailsUser.userPhoto[0])
+                            pageHttp.text = detailsUser.page
+                        }
                     } else {
                         HttpException(response).message()
                     }

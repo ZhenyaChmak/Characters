@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.characters.adapter.UserAdapter
 import com.example.characters.databinding.FragmentListUsersBinding
 import com.example.characters.model.User
-import com.example.characters.model.UserDetails
 import com.example.characters.retrofit.RetrofitService
 import retrofit2.Call
 import retrofit2.Callback
@@ -53,26 +52,9 @@ class UserListFragment : Fragment() {
 
         binding.listUsers.adapter = adapter
 
+        loadingUserRetrofit()
 
-        //TODO вынести константы
-        binding.listUsers.addItemDecoration(object : RecyclerView.ItemDecoration() {
-            override fun getItemOffsets(
-                outRect: Rect,
-                view: View,
-                parent: RecyclerView,
-                state: RecyclerView.State
-            ) {
-                outRect.left = 10
-                outRect.right = 10
-                val item = parent.adapter?.itemCount ?: return
-                val position = parent.getChildAdapterPosition(view)
-                if (position != item - 1)
-                    outRect.bottom = 15
-            }
-        })
-
-        loadingUser()
-
+        addDecorationUser(left = TEN_DP, right = TEN_DP, bottom = FIFTEEN_DP)
     }
 
     override fun onDestroyView() {
@@ -82,7 +64,7 @@ class UserListFragment : Fragment() {
 
     }
 
-    private fun loadingUser() {
+    private fun loadingUserRetrofit() {
         retrofitService = RetrofitService.loadingRetrofitService().getUsers()
         retrofitService?.enqueue(object : Callback<List<User>> {
             override fun onResponse(call: Call<List<User>>, response: Response<List<User>>) {
@@ -102,8 +84,29 @@ class UserListFragment : Fragment() {
             }
         })
     }
+
+    private fun addDecorationUser(left: Int, right: Int, bottom: Int) {
+        binding.listUsers.addItemDecoration(object : RecyclerView.ItemDecoration() {
+            override fun getItemOffsets(
+                outRect: Rect,
+                view: View,
+                parent: RecyclerView,
+                state: RecyclerView.State
+            ) {
+                outRect.left = left
+                outRect.right = right
+                val item = parent.adapter?.itemCount ?: return
+                val position = parent.getChildAdapterPosition(view)
+                if (position != item - 1)
+                    outRect.bottom = bottom
+            }
+        })
+    }
+
+
     companion object {
-        private var ID_USER = "id_user"
+        private const val TEN_DP = 10
+        private const val FIFTEEN_DP = 15
     }
 
 }
