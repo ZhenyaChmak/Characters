@@ -5,7 +5,6 @@ import com.example.characters.model.UserDetails
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Path
-import retrofit2.http.Query
 
 interface LoadingRequestData {
 
@@ -14,7 +13,7 @@ interface LoadingRequestData {
 
     @GET("api/v1/characters/{id}")
     fun getDetailsUser(
-        @Path("id") id: Long
+        @Path("id") id: Int
     ): Call<UserDetails>
 
 }

@@ -34,46 +34,47 @@ class UserDetailsFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
 
+        super.onViewCreated(view, savedInstanceState)
         loadingDetailsUser(args.userId)
     }
 
-
-    private fun loadingDetailsUser(id: Long) {
+    private fun loadingDetailsUser(id: Int) {
         retrofitServiceDetails = RetrofitService.loadingRetrofitService().getDetailsUser(id)
-            retrofitServiceDetails?.enqueue(object : Callback<UserDetails> {
-                override fun onResponse(
-                    call: Call<UserDetails>,
-                    response: Response<UserDetails>
-                ) {
-                    if(response.isSuccessful){
-                        val detailsUser = response.body() ?: return
-                        with(binding) {
-                            nameDetails.text = detailsUser.name
-                            userPhotoDetails.load(detailsUser.userPhoto[0])
-                            pageHttp.text = detailsUser.page
-                        }
-                    } else {
-                        HttpException(response).message()
+        retrofitServiceDetails?.enqueue(object : Callback<UserDetails> {
+            override fun onResponse(
+                call: Call<UserDetails>,
+                response: Response<UserDetails>
+            ) {
+                if (response.isSuccessful) {
+                    val detailsUser = response.body() ?: return
+                    with(binding) {
+                        nameDetails.text = detailsUser.name
+                        userPhotoDetails.load(detailsUser.userPhoto[0])
+                        pageHttp.text = detailsUser.page
                     }
-                    retrofitServiceDetails = null
+                } else {
+                    HttpException(response).message()
                 }
 
-                override fun onFailure(call: Call<UserDetails>, t: Throwable) {
+                retrofitServiceDetails = null
+            }
+
+            override fun onFailure(call: Call<UserDetails>, t: Throwable) {
+                if (call.isCanceled) {
                     Toast.makeText(requireContext(), t.message, Toast.LENGTH_LONG)
                         .show()
-                    retrofitServiceDetails = null
                 }
 
-            })
+                retrofitServiceDetails = null
+            }
+        })
     }
 
-
     override fun onDestroyView() {
+        super.onDestroyView()
         retrofitServiceDetails?.cancel()
         _binding = null
-        super.onDestroyView()
     }
 }
 

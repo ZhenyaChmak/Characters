@@ -20,4 +20,5 @@ class UserViewHolder(
             clickDetails(user)
         }
     }
+
 }

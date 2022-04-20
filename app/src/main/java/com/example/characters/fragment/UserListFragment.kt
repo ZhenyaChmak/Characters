@@ -17,11 +17,14 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.HttpException
 import retrofit2.Response
+import java.net.SocketException
 
 class UserListFragment : Fragment() {
 
     private var _binding: FragmentListUsersBinding? = null
     private val binding get() = requireNotNull(_binding)
+    private var retrofitService: Call<List<User>>? = null
+
     private val adapter by lazy {
         UserAdapter(requireContext())
         {
@@ -30,8 +33,6 @@ class UserListFragment : Fragment() {
             )
         }
     }
-
-    private var retrofitService: Call<List<User>>? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -54,17 +55,11 @@ class UserListFragment : Fragment() {
 
         loadingUserRetrofit()
 
-        addDecorationUser(left = TEN_DP, right = TEN_DP, bottom = FIFTEEN_DP)
-    }
-
-    override fun onDestroyView() {
-        retrofitService?.cancel()
-        _binding = null
-        super.onDestroyView()
-
+        addDecorationUser(bottomDecorator = FIFTEEN_DP)
     }
 
     private fun loadingUserRetrofit() {
+
         retrofitService = RetrofitService.loadingRetrofitService().getUsers()
         retrofitService?.enqueue(object : Callback<List<User>> {
             override fun onResponse(call: Call<List<User>>, response: Response<List<User>>) {
@@ -72,20 +67,25 @@ class UserListFragment : Fragment() {
                     val user = response.body() ?: return
                     adapter.submitList(user)
                 } else {
-                    HttpException(response).message()
+                    Toast.makeText(requireContext(), HttpException(response).message(), Toast.LENGTH_LONG)
+                        .show()
                 }
+
                 retrofitService = null
             }
 
             override fun onFailure(call: Call<List<User>>, t: Throwable) {
-                Toast.makeText(requireContext(), t.message, Toast.LENGTH_LONG)
-                    .show()
+                if (call.isCanceled && t == SocketException()) {
+                    Toast.makeText(requireContext(), t.message, Toast.LENGTH_LONG)
+                        .show()
+                }
+
                 retrofitService = null
             }
         })
     }
 
-    private fun addDecorationUser(left: Int, right: Int, bottom: Int) {
+    private fun addDecorationUser(bottomDecorator: Int) {
         binding.listUsers.addItemDecoration(object : RecyclerView.ItemDecoration() {
             override fun getItemOffsets(
                 outRect: Rect,
@@ -93,21 +93,37 @@ class UserListFragment : Fragment() {
                 parent: RecyclerView,
                 state: RecyclerView.State
             ) {
-                outRect.left = left
-                outRect.right = right
                 val item = parent.adapter?.itemCount ?: return
                 val position = parent.getChildAdapterPosition(view)
                 if (position != item - 1)
-                    outRect.bottom = bottom
+                    outRect.bottom = bottomDecorator
             }
         })
     }
 
-
-    companion object {
-        private const val TEN_DP = 10
-        private const val FIFTEEN_DP = 15
+    override fun onDestroyView() {
+        super.onDestroyView()
+        retrofitService?.cancel()
+        _binding = null
     }
 
+    companion object {
+        private const val FIFTEEN_DP = 15
+    }
 }
 
+/*fun RecyclerView.asdasd(bottomDecorator: Int){
+    binding.listUsers.addItemDecoration(object : RecyclerView.ItemDecoration() {
+        override fun getItemOffsets(
+            outRect: Rect,
+            view: View,
+            parent: RecyclerView,
+            state: RecyclerView.State
+        ) {
+            val item = parent.adapter?.itemCount ?: return
+            val position = parent.getChildAdapterPosition(view)
+            if (position != item - 1)
+                outRect.bottom = bottomDecorator
+        }
+    })
+}*/
