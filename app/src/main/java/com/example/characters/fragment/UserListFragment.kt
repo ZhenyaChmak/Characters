@@ -11,7 +11,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.example.characters.adapter.UserAdapter
 import com.example.characters.databinding.FragmentListUsersBinding
-import com.example.characters.model.User
+import com.example.characters.model.UserLoading
 import com.example.characters.retrofit.RetrofitService
 import retrofit2.Call
 import retrofit2.Callback
@@ -23,7 +23,7 @@ class UserListFragment : Fragment() {
 
     private var _binding: FragmentListUsersBinding? = null
     private val binding get() = requireNotNull(_binding)
-    private var retrofitService: Call<List<User>>? = null
+    private var retrofitService: Call<List<UserLoading.User>>? = null
 
     private val adapter by lazy {
         UserAdapter(requireContext())
@@ -61,11 +61,11 @@ class UserListFragment : Fragment() {
     private fun loadingUserRetrofit() {
 
         retrofitService = RetrofitService.loadingRetrofitService().getUsers()
-        retrofitService?.enqueue(object : Callback<List<User>> {
-            override fun onResponse(call: Call<List<User>>, response: Response<List<User>>) {
+        retrofitService?.enqueue(object : Callback<List<UserLoading.User>> {
+            override fun onResponse(call: Call<List<UserLoading.User>>, response: Response<List<UserLoading.User>>) {
                 if (response.isSuccessful) {
                     val user = response.body() ?: return
-                    adapter.submitList(user)
+                    adapter.submitList(user + UserLoading.Loading)
                 } else {
                     Toast.makeText(requireContext(), HttpException(response).message(), Toast.LENGTH_LONG)
                         .show()
@@ -74,7 +74,7 @@ class UserListFragment : Fragment() {
                 retrofitService = null
             }
 
-            override fun onFailure(call: Call<List<User>>, t: Throwable) {
+            override fun onFailure(call: Call<List<UserLoading.User>>, t: Throwable) {
                 if (call.isCanceled && t == SocketException()) {
                     Toast.makeText(requireContext(), t.message, Toast.LENGTH_LONG)
                         .show()
