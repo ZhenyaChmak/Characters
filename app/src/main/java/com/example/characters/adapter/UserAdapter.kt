@@ -18,7 +18,7 @@ class UserAdapter(
     private val layoutInflater = LayoutInflater.from(context)
 
     override fun getItemViewType(position: Int): Int {
-        return  when (getItem(position)){
+        return when (getItem(position)) {
             is UserLoading.User -> TYPE_USER
             is UserLoading.Loading -> TYPE_LOADING
         }
@@ -44,8 +44,8 @@ class UserAdapter(
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val userLoadingVH = holder as? UserViewHolder ?: return
-        val user = getItem(position) as? UserLoading.User ?: return
-        userLoadingVH.bind(user)
+        val item = getItem(position) as? UserLoading.User ?: return
+        userLoadingVH.bind(item)
     }
 
     companion object {
@@ -63,7 +63,5 @@ class UserAdapter(
             }
         }
     }
-
-
 
 }

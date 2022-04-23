@@ -6,8 +6,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import coil.load
+import com.example.characters.R
 import com.example.characters.databinding.FragmentUserDetailsBinding
 import com.example.characters.model.UserDetails
 import com.example.characters.retrofit.RetrofitService
@@ -34,8 +36,10 @@ class UserDetailsFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-
         super.onViewCreated(view, savedInstanceState)
+
+        addCustomToolbar(args.nameUser)
+
         loadingDetailsUser(args.userId)
     }
 
@@ -51,10 +55,15 @@ class UserDetailsFragment : Fragment() {
                     with(binding) {
                         nameDetails.text = detailsUser.name
                         userPhotoDetails.load(detailsUser.userPhoto[0])
-                        pageHttp.text = detailsUser.page
+                        pageHttp.text = detailsUser.pageHttp
                     }
                 } else {
-                    HttpException(response).message()
+                    Toast.makeText(
+                        requireContext(),
+                        HttpException(response).message(),
+                        Toast.LENGTH_LONG
+                    )
+                        .show()
                 }
 
                 retrofitServiceDetails = null
@@ -71,10 +80,20 @@ class UserDetailsFragment : Fragment() {
         })
     }
 
+    private fun addCustomToolbar(name: String) {
+        with(binding) {
+            toolbarDetails.title = name
+            toolbarDetails.setNavigationIcon(R.drawable.ic_back)
+            toolbarDetails.setNavigationOnClickListener {
+                findNavController().navigateUp()
+            }
+        }
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         retrofitServiceDetails?.cancel()
         _binding = null
     }
-}
 
+}

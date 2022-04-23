@@ -9,7 +9,9 @@ import retrofit2.http.Path
 interface LoadingRequestData {
 
     @GET("api/v1/characters")
-    fun getUsers(): Call<List<UserLoading.User>>
+    fun getUsers(
+
+    ): Call<List<UserLoading.User>>
 
     @GET("api/v1/characters/{id}")
     fun getDetailsUser(

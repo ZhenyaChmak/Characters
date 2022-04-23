@@ -12,4 +12,5 @@ sealed class UserLoading {
     ) : UserLoading()
 
     object Loading : UserLoading()
+
 }

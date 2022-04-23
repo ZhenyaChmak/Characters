@@ -4,21 +4,30 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="10dp"
     android:background="#7200F6FF">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar_details"
+        style="@style/Widget.MaterialComponents.Toolbar.Primary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:title="@string/name_details_user" />
 
     <ImageView
         android:id="@+id/user_photo_details"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:background="#0D1308"
+        android:contentDescription="@null"
         android:scaleType="centerCrop"
         android:src="@drawable/user_photo"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHeight_percent="0.4"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:contentDescription="@null" />
+        app:layout_constraintTop_toBottomOf="@id/toolbar_details" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline2"
@@ -64,23 +73,21 @@
         android:linksClickable="true"
         android:textColorLink="#EBD11B1B"
         android:textSize="24sp"
-        app:layout_constraintStart_toStartOf="@id/guideline3"
         app:layout_constraintBaseline_toBaselineOf="@id/page"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/page"
-
+        app:layout_constraintStart_toStartOf="@id/guideline3"
         tools:text="Https" />
 
     <TextView
         android:id="@+id/name_details"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="@id/guideline3"
         android:textSize="32sp"
         app:layout_constraintBaseline_toBaselineOf="@id/name"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/name"
+        app:layout_constraintStart_toStartOf="@id/guideline3"
         tools:text="UserName" />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

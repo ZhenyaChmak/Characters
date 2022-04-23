@@ -7,5 +7,6 @@ data class UserDetails(
      val name: String,
      @SerializedName("images")
      val userPhoto : List<String>,
-     val page : String,
+     @SerializedName("page")
+     val pageHttp : String,
 )

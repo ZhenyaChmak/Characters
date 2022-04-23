@@ -2,4 +2,5 @@
     <string name="app_name">Characters Naruto</string>
     <string name="name_details_user">Name:</string>
     <string name="page_details_user">Page:</string>
+    <string name="list_characters">List characters</string>
 </resources>
