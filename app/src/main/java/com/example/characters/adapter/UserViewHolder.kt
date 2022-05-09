@@ -7,15 +7,17 @@ import com.example.characters.model.PageItem
 
 class UserViewHolder(
     private val binding: FragmentUserBinding,
-    private val clickDetails: (PageItem.User) -> Unit
+    private val click: (PageItem.User) -> Unit
 ) : RecyclerView.ViewHolder(binding.root) {
 
     fun bind(user: PageItem.User) {
-        binding.userName.text = user.name
-        binding.userPhoto.load(user.userPhoto[0])
+        with(binding){
+            userName.text = user.name
+            userPhoto.load(user.userPhoto[0])
 
-        binding.root.setOnClickListener {
-            clickDetails(user)
+            root.setOnClickListener {
+                click(user)
+            }
         }
     }
 
