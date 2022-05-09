@@ -9,7 +9,6 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import coil.load
-import com.example.characters.R
 import com.example.characters.databinding.FragmentUserDetailsBinding
 import com.example.characters.model.UserDetails
 import com.example.characters.retrofit.RetrofitService
@@ -83,7 +82,6 @@ class UserDetailsFragment : Fragment() {
     private fun addCustomToolbar(name: String) {
         with(binding) {
             toolbarDetails.title = name
-            toolbarDetails.setNavigationIcon(R.drawable.ic_back)
             toolbarDetails.setNavigationOnClickListener {
                 findNavController().navigateUp()
             }

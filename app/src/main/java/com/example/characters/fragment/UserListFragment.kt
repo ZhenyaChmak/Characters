@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.characters.adapter.UserAdapter
 import com.example.characters.databinding.FragmentListUsersBinding
 import com.example.characters.decoration.addDecorationUser
-import com.example.characters.model.UserLoading
+import com.example.characters.model.PageItem
 import com.example.characters.retrofit.RetrofitService
 import retrofit2.Call
 import retrofit2.Callback
@@ -24,7 +24,7 @@ class UserListFragment : Fragment() {
 
     private var _binding: FragmentListUsersBinding? = null
     private val binding get() = requireNotNull(_binding)
-    private var retrofitService: Call<List<UserLoading.User>>? = null
+    private var currentCall: Call<List<PageItem.User>>? = null
     private var isLoading = false
     private var iSLoadingCount = false
 
@@ -40,11 +40,9 @@ class UserListFragment : Fragment() {
         }
     }
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         loadingUserRetrofit()
-
     }
 
     override fun onCreateView(
@@ -64,7 +62,7 @@ class UserListFragment : Fragment() {
 
             swipeRefresh.setOnRefreshListener {
                 iSLoadingCount = false
-                loadingUserRetrofit()
+             //   loadingUserRetrofit()
                 swipeRefresh.isRefreshing = false
             }
 
@@ -72,7 +70,7 @@ class UserListFragment : Fragment() {
 
             listUsers.adapter = adapter
             listUsers.layoutManager = layoutManager
-            listUsers.addDecorationUser(bottomDecorator = FIFTEEN_DP)
+            listUsers.addDecorationUser(bottomDecorator = BUTTOM_DECORATION)
 
             listUsers.addPaginationScrollListener(layoutManager, 1) {
                 if (!isLoading) {
@@ -83,12 +81,12 @@ class UserListFragment : Fragment() {
     }
 
     private fun loadingUserRetrofit() {
-        retrofitService = RetrofitService.loadingRetrofitService().getUsers()
+        currentCall = RetrofitService.loadingRetrofitService().getUsers()
         isLoading = true
-        retrofitService?.enqueue(object : Callback<List<UserLoading.User>> {
+        currentCall?.enqueue(object : Callback<List<PageItem.User>> {
             override fun onResponse(
-                call: Call<List<UserLoading.User>>,
-                response: Response<List<UserLoading.User>>
+                call: Call<List<PageItem.User>>,
+                response: Response<List<PageItem.User>>
             ) {
                 if (response.isSuccessful) {
                     val user = response.body() ?: return
@@ -96,11 +94,11 @@ class UserListFragment : Fragment() {
                         val currentList = adapter.currentList.toList().dropLast(1)
                         val resultList = currentList
                             .plus(user)
-                            .plus(UserLoading.Loading)
+                            .plus(PageItem.Loading)
                         adapter.submitList(resultList)
                         isLoading = false
                     } else {
-                        adapter.submitList(user + UserLoading.Loading)
+                        adapter.submitList(user + PageItem.Loading)
                         iSLoadingCount = true
                         isLoading = false
                     }
@@ -113,28 +111,28 @@ class UserListFragment : Fragment() {
                         .show()
                 }
 
-                retrofitService = null
+                currentCall = null
             }
 
-            override fun onFailure(call: Call<List<UserLoading.User>>, t: Throwable) {
-                if (call.isCanceled && t == SocketException()) {
+            override fun onFailure(call: Call<List<PageItem.User>>, t: Throwable) {
+                if (call.isCanceled && t is SocketException) {
                     Toast.makeText(requireContext(), t.message, Toast.LENGTH_LONG)
                         .show()
                 }
 
-                retrofitService = null
+                currentCall = null
             }
         })
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        retrofitService?.cancel()
+        currentCall?.cancel()
         _binding = null
     }
 
     companion object {
-        private const val FIFTEEN_DP = 15
+        private const val BUTTOM_DECORATION = 15
     }
 }
 

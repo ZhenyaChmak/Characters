@@ -2,15 +2,15 @@ package com.example.characters.model
 
 import com.google.gson.annotations.SerializedName
 
-sealed class UserLoading {
+sealed class PageItem {
 
     data class User(
         val id: Int,
         val name: String,
         @SerializedName("images")
         val userPhoto: List<String>,
-    ) : UserLoading()
+    ) : PageItem()
 
-    object Loading : UserLoading()
+    object Loading : PageItem()
 
 }
