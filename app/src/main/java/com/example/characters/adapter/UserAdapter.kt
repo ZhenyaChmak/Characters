@@ -29,7 +29,7 @@ class UserAdapter(
             TYPE_USER -> {
                 UserViewHolder(
                     binding = FragmentUserBinding.inflate(layoutInflater, parent, false),
-                    clickDetails = click
+                    click = click
                 )
             }
 

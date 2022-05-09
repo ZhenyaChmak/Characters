@@ -62,17 +62,17 @@ class UserListFragment : Fragment() {
 
             swipeRefresh.setOnRefreshListener {
                 iSLoadingCount = false
-             //   loadingUserRetrofit()
+                loadingUserRetrofit()
                 swipeRefresh.isRefreshing = false
             }
 
             val layoutManager = LinearLayoutManager(requireContext())
 
-            listUsers.adapter = adapter
-            listUsers.layoutManager = layoutManager
-            listUsers.addDecorationUser(bottomDecorator = BUTTOM_DECORATION)
+            usersList.adapter = adapter
+            usersList.layoutManager = layoutManager
+            usersList.addDecorationUser(bottomDecorator = BOTTOM_DECORATION)
 
-            listUsers.addPaginationScrollListener(layoutManager, 1) {
+            usersList.addPaginationScrollListener(layoutManager, 1) {
                 if (!isLoading) {
                     loadingUserRetrofit()
                 }
@@ -116,7 +116,11 @@ class UserListFragment : Fragment() {
 
             override fun onFailure(call: Call<List<PageItem.User>>, t: Throwable) {
                 if (call.isCanceled && t is SocketException) {
-                    Toast.makeText(requireContext(), t.message, Toast.LENGTH_LONG)
+                    Toast.makeText(
+                        requireContext(),
+                        t.message,
+                        Toast.LENGTH_LONG
+                    )
                         .show()
                 }
 
@@ -132,10 +136,9 @@ class UserListFragment : Fragment() {
     }
 
     companion object {
-        private const val BUTTOM_DECORATION = 15
+        private const val BOTTOM_DECORATION = 15
     }
 }
-
 
 fun RecyclerView.addPaginationScrollListener(
     layoutManager: LinearLayoutManager,

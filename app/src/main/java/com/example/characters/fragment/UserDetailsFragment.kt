@@ -37,7 +37,7 @@ class UserDetailsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        addCustomToolbar(args.nameUser)
+        addCustomToolbar(args.userName)
 
         loadingDetailsUser(args.userId)
     }
