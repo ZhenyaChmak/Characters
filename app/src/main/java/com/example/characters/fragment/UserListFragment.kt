@@ -30,7 +30,6 @@ class UserListFragment : Fragment() {
 
     private var _binding: FragmentListUsersBinding? = null
     private val binding get() = requireNotNull(_binding)
-    private var isLoading = false
 
     private val adapter by lazy {
         UserAdapter(requireContext())
@@ -101,7 +100,7 @@ class UserListFragment : Fragment() {
             usersList.adapter = adapter
             usersList.layoutManager = layoutManager
             usersList.addDecorationUser(bottomDecorator = BOTTOM_DECORATION)
-            
+
             /* swipeRefresh.setOnRefreshListener {
                  pagingSource.onRefresh()
                  swipeRefresh.isRefreshing = false
