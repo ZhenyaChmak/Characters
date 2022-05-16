@@ -6,9 +6,11 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.create
 import java.util.concurrent.TimeUnit
 
-object RetrofitService {
+object ServiceLocator {
 
-    private val retrofitService by lazy { retrofit.create<LoadingRequestData>() }
+    private val retrofitService by lazy {
+        retrofit.create<LoadingRequestData>()
+    }
 
     private val retrofit = Retrofit.Builder()
         .baseUrl("https://naruto-api.herokuapp.com/")
@@ -23,8 +25,8 @@ object RetrofitService {
             .build()
     }
 
-    fun loadingRetrofitService(): LoadingRequestData {
-        return retrofitService
+    fun provideRepository(): UserRepository {
+        return UserRepository(retrofitService)
     }
 
 }
