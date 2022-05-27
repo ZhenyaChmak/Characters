@@ -12,10 +12,10 @@ interface UserDao {
     @Query("SELECT * FROM user")
     suspend fun getUsers(): List<User>
 
+    @Query("SELECT * FROM user LIMIT :limit OFFSET :offset")
+    suspend fun getUsersQuantity(limit:Int, offset:Int): List<User>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertUser(user: List<User>)
-
-    @Query("SELECT * FROM user WHERE id = 1")
-    suspend fun getUser(): User
 
 }

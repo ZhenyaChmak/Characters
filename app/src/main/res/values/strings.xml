@@ -3,4 +3,6 @@
     <string name="name_details_user">Name:</string>
     <string name="page_details_user">Page:</string>
     <string name="list_characters">List characters</string>
+    <string name="ok">OK</string>
+    <string name="is_no_internet">Нет подключения к Интернету</string>
 </resources>

@@ -1,8 +1,8 @@
 package com.example.characters.model
 
-sealed class PageItem<T> {
+sealed class PageItem<out T> {
 
-    class Context<T>(val data: T) : PageItem<T>()
+    data class Element<T>(val data: T) : PageItem<T>()
 
     object Loading : PageItem<Nothing>()
 

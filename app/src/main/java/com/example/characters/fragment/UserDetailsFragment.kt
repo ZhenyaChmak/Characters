@@ -10,18 +10,21 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import coil.load
+import com.example.characters.R
 import com.example.characters.databinding.FragmentUserDetailsBinding
-import com.example.characters.retrofit.ServiceLocator
-import kotlinx.coroutines.launch
+import com.example.characters.model.UserDetailsViewModel
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class UserDetailsFragment : Fragment() {
 
     private var _binding: FragmentUserDetailsBinding? = null
     private val binding get() = requireNotNull(_binding)
+
+    private val viewModel by viewModel<UserDetailsViewModel>()
+
     private val args by navArgs<UserDetailsFragmentArgs>()
-    private val userRepositoryDetails by lazy {
-        ServiceLocator.provideRepository()
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -38,24 +41,27 @@ class UserDetailsFragment : Fragment() {
 
         addCustomToolbar(args.userName)
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            kotlin.runCatching { userRepositoryDetails.getDetailsUser(args.userId) }
-                .fold(
-                    onSuccess = {
-                        val user = userRepositoryDetails.getDetailsUser(args.userId)
+        viewModel.onLoadMoreDetails(args.userId)
+
+        viewModel
+            .dataFlow
+            .onEach {
+                it.fold(
+                    onSuccess = { user ->
                         binding.nameDetails.text = user.name
                         binding.userPhotoDetails.load(user.userPhoto[0])
                         binding.pageHttp.text = user.pageHttp
                     },
                     onFailure = {
                         AlertDialog.Builder(requireContext())
-                            .setMessage("Нет подключения к Интернету")
+                            .setMessage(R.string.is_no_internet)
                             .setCancelable(false)
-                            .setPositiveButton("OK") { _, _ -> findNavController().navigateUp() }
+                            .setPositiveButton(R.string.ok) { _, _ -> findNavController().navigateUp() }
                             .show()
                     }
                 )
-        }
+            }
+            .launchIn(viewLifecycleOwner.lifecycleScope)
     }
 
     private fun addCustomToolbar(name: String) {

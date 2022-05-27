@@ -1,16 +1,15 @@
-package com.example.characters.fragment
+package com.example.characters.model
 
+import androidx.lifecycle.ViewModel
 import com.example.characters.database.UserDao
-import com.example.characters.model.User
 import com.example.characters.retrofit.UserRepository
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.*
-/*
 
-class PagingSource(
-    private val userRepository: UserRepository,
+class UserListViewModel(
+    private val repository: UserRepository,
     private val userDao: UserDao
-) {
+) : ViewModel() {
 
     private val loadSharedFlow = MutableSharedFlow<LoadState>(
         replay = 1,
@@ -19,7 +18,7 @@ class PagingSource(
     )
 
     private var isLoading = false
-    private var currentPage = 0
+    private var currentPage = 1
 
     fun onLoadMore() {
         loadSharedFlow.tryEmit(LoadState.LOAD)
@@ -33,38 +32,41 @@ class PagingSource(
         return loadSharedFlow
             .filter { !isLoading }
             .onEach {
-                */
-/*if (it == LoadState.REFRESH)
-                    currentPage = 0*//*
-
+                if (it == LoadState.REFRESH) {
+                    currentPage = 1
+                }
+                if (it == LoadState.LOAD) {
+                    currentPage++
+                }
                 isLoading = true
             }
             .map {
-                userRepository.getUsers()
+                repository.getUsers()
                     .fold(
-                        onSuccess = { it },
+                        onSuccess = {
+                            userDao.insertUser(it)
+                            userDao.getUsersQuantity(currentPage * PAGE_SIZE, 0)
+                        },
                         onFailure = {
-                            */
-/* AlertDialog.Builder(requireContext())
-                                 .setMessage("Нет подключения к Интернету")
-                                 .show()*//*
-
-                            userDao.getUsers()
+                            userDao.getUsersQuantity(currentPage * PAGE_SIZE, 0)
                         }
                     )
             }
             .onEach {
-                userDao.insertUser(it)
                 isLoading = false
-                //  currentPage++
+
             }
-            .runningReduce { accumulator, value -> accumulator + value }
             .onStart {
-                emit(userDao.getUsers())
+                emit(userDao.getUsersQuantity(currentPage * PAGE_SIZE, 0))
             }
     }
 
     enum class LoadState {
         LOAD, REFRESH
     }
-}*/
+
+    companion object {
+        private const val PAGE_SIZE = 10
+    }
+
+}
