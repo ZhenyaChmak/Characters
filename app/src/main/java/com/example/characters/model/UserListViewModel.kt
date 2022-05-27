@@ -35,9 +35,6 @@ class UserListViewModel(
                 if (it == LoadState.REFRESH) {
                     currentPage = 1
                 }
-                if (it == LoadState.LOAD) {
-                    currentPage++
-                }
                 isLoading = true
             }
             .map {
@@ -45,6 +42,7 @@ class UserListViewModel(
                     .fold(
                         onSuccess = {
                             userDao.insertUser(it)
+                            currentPage++
                             userDao.getUsersQuantity(currentPage * PAGE_SIZE, 0)
                         },
                         onFailure = {
