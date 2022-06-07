@@ -4,8 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -13,20 +13,16 @@ import com.example.characters.adapter.UserAdapter
 import com.example.characters.databinding.FragmentListUsersBinding
 import com.example.characters.decoration.addDecorationUser
 import com.example.characters.model.PageItem
-import com.example.characters.retrofit.RetrofitService
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.HttpException
-import retrofit2.Response
-import java.net.SocketException
+import com.example.characters.model.UserListViewModel
+import kotlinx.coroutines.flow.*
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class UserListFragment : Fragment() {
 
     private var _binding: FragmentListUsersBinding? = null
     private val binding get() = requireNotNull(_binding)
-    private var currentCall: Call<List<PageItem.User>>? = null
-    private var isLoading = false
-    private var iSLoadingCount = false
+
+    private val viewModel by viewModel<UserListViewModel>()
 
     private val adapter by lazy {
         UserAdapter(requireContext())
@@ -38,11 +34,6 @@ class UserListFragment : Fragment() {
                 )
             )
         }
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        loadingUserRetrofit()
     }
 
     override fun onCreateView(
@@ -59,84 +50,39 @@ class UserListFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         with(binding) {
-
-            swipeRefresh.setOnRefreshListener {
-                iSLoadingCount = false
-                loadingUserRetrofit()
-                swipeRefresh.isRefreshing = false
-            }
-
             val layoutManager = LinearLayoutManager(requireContext())
 
             usersList.adapter = adapter
             usersList.layoutManager = layoutManager
             usersList.addDecorationUser(bottomDecorator = BOTTOM_DECORATION)
 
-            usersList.addPaginationScrollListener(layoutManager, 1) {
-                if (!isLoading) {
-                    loadingUserRetrofit()
+            usersList
+                .addPaginationScrollListener(layoutManager, ITEMS_TO_LOADING) {
+                    viewModel.onLoadMore()
                 }
+
+            swipeRefresh.setOnRefreshListener {
+                viewModel.onRefresh()
+                swipeRefresh.isRefreshing = false
             }
+
+            viewModel.getData().onEach { list ->
+                adapter.submitList(list.map {
+                    PageItem.Element(it)
+                } + PageItem.Loading)
+            }.launchIn(viewLifecycleOwner.lifecycleScope)
         }
-    }
-
-    private fun loadingUserRetrofit() {
-        currentCall = RetrofitService.loadingRetrofitService().getUsers()
-        isLoading = true
-        currentCall?.enqueue(object : Callback<List<PageItem.User>> {
-            override fun onResponse(
-                call: Call<List<PageItem.User>>,
-                response: Response<List<PageItem.User>>
-            ) {
-                if (response.isSuccessful) {
-                    val user = response.body() ?: return
-                    if (iSLoadingCount) {
-                        val currentList = adapter.currentList.toList().dropLast(1)
-                        val resultList = currentList
-                            .plus(user)
-                            .plus(PageItem.Loading)
-                        adapter.submitList(resultList)
-                        isLoading = false
-                    } else {
-                        adapter.submitList(user + PageItem.Loading)
-                        iSLoadingCount = true
-                        isLoading = false
-                    }
-                } else {
-                    Toast.makeText(
-                        requireContext(),
-                        HttpException(response).message(),
-                        Toast.LENGTH_LONG
-                    )
-                        .show()
-                }
-
-                currentCall = null
-            }
-
-            override fun onFailure(call: Call<List<PageItem.User>>, t: Throwable) {
-                if (call.isCanceled && t is SocketException) {
-                    Toast.makeText(
-                        requireContext(),
-                        t.message,
-                        Toast.LENGTH_LONG
-                    )
-                        .show()
-                }
-
-                currentCall = null
-            }
-        })
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        currentCall?.cancel()
         _binding = null
     }
 
     companion object {
         private const val BOTTOM_DECORATION = 15
+        private const val ITEMS_TO_LOADING = 1
+
     }
 }
 
@@ -153,7 +99,7 @@ fun RecyclerView.addPaginationScrollListener(
             val lastVisibility = layoutManager.findLastVisibleItemPosition()
 
             if (dy != 0 && totalItemCount <= (lastVisibility + itemsToLoading)) {
-                onLoadMore()
+                recyclerView.post(onLoadMore)
             }
         }
     })

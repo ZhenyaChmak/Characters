@@ -3,20 +3,20 @@ package com.example.characters.adapter
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.example.characters.databinding.FragmentUserBinding
-import com.example.characters.model.PageItem
+import com.example.characters.model.User
 
 class UserViewHolder(
     private val binding: FragmentUserBinding,
-    private val click: (PageItem.User) -> Unit
+    private val onUserClicked: (User) -> Unit
 ) : RecyclerView.ViewHolder(binding.root) {
 
-    fun bind(user: PageItem.User) {
-        with(binding){
+    fun bind(user:  User) {
+        with(binding) {
             userName.text = user.name
             userPhoto.load(user.userPhoto[0])
 
             root.setOnClickListener {
-                click(user)
+                onUserClicked(user)
             }
         }
     }

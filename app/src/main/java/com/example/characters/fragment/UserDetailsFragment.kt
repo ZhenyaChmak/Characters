@@ -1,28 +1,30 @@
 package com.example.characters.fragment
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import coil.load
+import com.example.characters.R
 import com.example.characters.databinding.FragmentUserDetailsBinding
-import com.example.characters.model.UserDetails
-import com.example.characters.retrofit.RetrofitService
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.HttpException
-import retrofit2.Response
+import com.example.characters.model.UserDetailsViewModel
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class UserDetailsFragment : Fragment() {
 
     private var _binding: FragmentUserDetailsBinding? = null
     private val binding get() = requireNotNull(_binding)
+
+    private val viewModel by viewModel<UserDetailsViewModel>()
+
     private val args by navArgs<UserDetailsFragmentArgs>()
-    private var retrofitServiceDetails: Call<UserDetails>? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -39,44 +41,27 @@ class UserDetailsFragment : Fragment() {
 
         addCustomToolbar(args.userName)
 
-        loadingDetailsUser(args.userId)
-    }
+        viewModel.onLoadMoreDetails(args.userId)
 
-    private fun loadingDetailsUser(id: Int) {
-        retrofitServiceDetails = RetrofitService.loadingRetrofitService().getDetailsUser(id)
-        retrofitServiceDetails?.enqueue(object : Callback<UserDetails> {
-            override fun onResponse(
-                call: Call<UserDetails>,
-                response: Response<UserDetails>
-            ) {
-                if (response.isSuccessful) {
-                    val detailsUser = response.body() ?: return
-                    with(binding) {
-                        nameDetails.text = detailsUser.name
-                        userPhotoDetails.load(detailsUser.userPhoto[0])
-                        pageHttp.text = detailsUser.pageHttp
+        viewModel
+            .dataFlow
+            .onEach {
+                it.fold(
+                    onSuccess = { user ->
+                        binding.nameDetails.text = user.name
+                        binding.userPhotoDetails.load(user.userPhoto[0])
+                        binding.pageHttp.text = user.pageHttp
+                    },
+                    onFailure = {
+                        AlertDialog.Builder(requireContext())
+                            .setMessage(R.string.is_no_internet)
+                            .setCancelable(false)
+                            .setPositiveButton(R.string.ok) { _, _ -> findNavController().navigateUp() }
+                            .show()
                     }
-                } else {
-                    Toast.makeText(
-                        requireContext(),
-                        HttpException(response).message(),
-                        Toast.LENGTH_LONG
-                    )
-                        .show()
-                }
-
-                retrofitServiceDetails = null
+                )
             }
-
-            override fun onFailure(call: Call<UserDetails>, t: Throwable) {
-                if (call.isCanceled) {
-                    Toast.makeText(requireContext(), t.message, Toast.LENGTH_LONG)
-                        .show()
-                }
-
-                retrofitServiceDetails = null
-            }
-        })
+            .launchIn(viewLifecycleOwner.lifecycleScope)
     }
 
     private fun addCustomToolbar(name: String) {
@@ -90,7 +75,6 @@ class UserDetailsFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        retrofitServiceDetails?.cancel()
         _binding = null
     }
 
