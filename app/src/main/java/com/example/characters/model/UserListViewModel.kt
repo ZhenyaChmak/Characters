@@ -1,14 +1,15 @@
 package com.example.characters.model
 
 import androidx.lifecycle.ViewModel
-import com.example.characters.database.UserDao
-import com.example.characters.retrofit.UserRepository
+import com.example.characters.domain.model.User
+import com.example.characters.domain.usecase.GetUsersLocalUseCase
+import com.example.characters.domain.usecase.GetUsersRemoteUseCase
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.*
 
 class UserListViewModel(
-    private val repository: UserRepository,
-    private val userDao: UserDao
+    private val remoteUseCase: GetUsersRemoteUseCase,
+    private val localUseCase: GetUsersLocalUseCase
 ) : ViewModel() {
 
     private val loadSharedFlow = MutableSharedFlow<LoadState>(
@@ -28,36 +29,19 @@ class UserListViewModel(
         loadSharedFlow.tryEmit(LoadState.REFRESH)
     }
 
-    fun getData(): Flow<List<User>> {
-        return loadSharedFlow
-            .filter { !isLoading }
-            .onEach {
-                if (it == LoadState.REFRESH) {
-                    currentPage = 1
-                }
-                isLoading = true
-            }
-            .map {
-                repository.getUsers()
-                    .fold(
-                        onSuccess = {
-                            userDao.insertUser(it)
-                            currentPage++
-                            userDao.getUsersQuantity(currentPage * PAGE_SIZE, 0)
-                        },
-                        onFailure = {
-                            userDao.getUsersQuantity(currentPage * PAGE_SIZE, 0)
-                        }
-                    )
-            }
-            .onEach {
-                isLoading = false
+    fun getData(): Flow<List<User>> = flow<List<User>> {
+        remoteUseCase()
+            .fold(
+                onSuccess = {
 
-            }
-            .onStart {
-                emit(userDao.getUsersQuantity(currentPage * PAGE_SIZE, 0))
-            }
+                },
+                onFailure = {
+                }
+            )
     }
+        .onStart {
+            emit(remoteUseCase.invoke().getOrDefault(emptyList()))
+        }
 
     enum class LoadState {
         LOAD, REFRESH
@@ -66,5 +50,43 @@ class UserListViewModel(
     companion object {
         private const val PAGE_SIZE = 10
     }
-
 }
+
+/*fun getData(): Flow<List<User>> {
+    return loadSharedFlow
+        .filter { !isLoading }
+        .onEach {
+            if (it == LoadState.REFRESH) {
+                currentPage = 1
+            }
+            isLoading = true
+        }
+        .map {
+            getUsersUseCase()
+                .fold(
+                    onSuccess = {
+                        userLocalUseCase.iasd(it)
+                      //  userDao.insertUser(it)
+                        currentPage++
+                        userLocalUseCase(currentPage * PAGE_SIZE, 0)
+                      //  userDao.getUsersQuantity(currentPage * PAGE_SIZE, 0)
+                    },
+                    onFailure = {
+                        userLocalUseCase(currentPage * PAGE_SIZE, 0)
+                      //  userDao.getUsersQuantity(currentPage * PAGE_SIZE, 0)
+                    }
+                )
+        }
+        .onEach {
+            isLoading = false
+
+        }
+        .onStart {
+            emit(userDao.getUsersQuantity(currentPage * PAGE_SIZE, 0))
+        }
+}*/
+
+
+
+
+

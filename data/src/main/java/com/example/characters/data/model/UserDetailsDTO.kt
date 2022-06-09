@@ -1,8 +1,8 @@
-package com.example.characters.model
+package com.example.characters.data.model
 
 import com.google.gson.annotations.SerializedName
 
-data class UserDetails(
+internal data class UserDetailsDTO(
     val id: Int,
     val name: String,
     @SerializedName("images")

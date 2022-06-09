@@ -16,13 +16,16 @@ import com.example.characters.model.UserDetailsViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 
 class UserDetailsFragment : Fragment() {
 
     private var _binding: FragmentUserDetailsBinding? = null
     private val binding get() = requireNotNull(_binding)
 
-    private val viewModel by viewModel<UserDetailsViewModel>()
+    private val viewModel by viewModel<UserDetailsViewModel>{
+        parametersOf(args.userId)
+    }
 
     private val args by navArgs<UserDetailsFragmentArgs>()
 
@@ -41,7 +44,7 @@ class UserDetailsFragment : Fragment() {
 
         addCustomToolbar(args.userName)
 
-        viewModel.onLoadMoreDetails(args.userId)
+       // viewModel.onLoadMoreDetails(args.userId)
 
         viewModel
             .dataFlow

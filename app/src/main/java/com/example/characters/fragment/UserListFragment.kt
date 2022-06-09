@@ -69,8 +69,14 @@ class UserListFragment : Fragment() {
             viewModel.getData().onEach { list ->
                 adapter.submitList(list.map {
                     PageItem.Element(it)
-                } + PageItem.Loading)
+                } )
             }.launchIn(viewLifecycleOwner.lifecycleScope)
+
+            /*viewModel.getData().onEach { list ->
+                adapter.submitList(list.map {
+                    PageItem.Element(it)
+                } + PageItem.Loading)
+            }.launchIn(viewLifecycleOwner.lifecycleScope)*/
         }
     }
 

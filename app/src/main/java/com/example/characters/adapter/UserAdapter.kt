@@ -8,8 +8,8 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.characters.databinding.FragmentUserBinding
 import com.example.characters.databinding.ItemLoadingBinding
+import com.example.characters.domain.model.User
 import com.example.characters.model.PageItem
-import com.example.characters.model.User
 
 class UserAdapter(
     context: Context,

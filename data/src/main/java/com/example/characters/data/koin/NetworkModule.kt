@@ -1,6 +1,6 @@
-package com.example.characters.koin
+package com.example.characters.data.koin
 
-import com.example.characters.retrofit.LoadingRequestData
+import com.example.characters.data.api.GithubApi
 import okhttp3.OkHttpClient
 import org.koin.dsl.module
 import retrofit2.Retrofit
@@ -8,7 +8,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.create
 import java.util.concurrent.TimeUnit
 
-val networkModule = module {
+internal val networkModule = module {
 
     single {
         OkHttpClient.Builder()
@@ -26,7 +26,7 @@ val networkModule = module {
     }
 
     single {
-        get<Retrofit>().create<LoadingRequestData>()
+        get<Retrofit>().create<GithubApi>()
     }
 
 }

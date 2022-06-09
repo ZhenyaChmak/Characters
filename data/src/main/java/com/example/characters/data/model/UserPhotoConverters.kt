@@ -1,8 +1,8 @@
-package com.example.characters.model
+package com.example.characters.data.model
 
 import androidx.room.TypeConverter
 
-class UserPhotoConverters {
+internal class UserPhotoConverters {
 
     @TypeConverter
     fun toListOfStrings(userPhoto: String): List<String> {

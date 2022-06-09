@@ -1,16 +1,14 @@
-package com.example.characters.model
+package com.example.characters.data.model
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.google.gson.annotations.SerializedName
 
 @Entity
-data class User(
+internal data class UserEntity(
     @PrimaryKey
     val id: Int,
     @ColumnInfo(name = "name")
     val name: String,
-    @SerializedName("images")
     val userPhoto: List<String>
 )
