@@ -1,4 +1,4 @@
-package com.example.characters.data.koin
+package com.example.characters.data.di
 
 import com.example.characters.data.api.GithubApi
 import okhttp3.OkHttpClient

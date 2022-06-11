@@ -1,4 +1,4 @@
-package com.example.characters.data.koin
+package com.example.characters.data.di
 
 import com.example.characters.data.repository.UserDetailsRepositoryImpl
 import com.example.characters.domain.repository.UserDetailsRepository

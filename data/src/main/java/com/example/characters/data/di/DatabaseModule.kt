@@ -1,4 +1,4 @@
-package com.example.characters.data.koin
+package com.example.characters.data.di
 
 import androidx.room.Room
 import com.example.characters.data.database.AppDatabase
