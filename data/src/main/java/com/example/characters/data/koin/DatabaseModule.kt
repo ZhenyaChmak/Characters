@@ -11,7 +11,7 @@ internal val databaseModule = module {
             .databaseBuilder(
                 get(),
                 AppDatabase::class.java,
-                "app-database"
+                "database"
             )
             .build()
     }

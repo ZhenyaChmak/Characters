@@ -9,10 +9,10 @@ import com.example.characters.data.model.UserEntity
 @Dao
 internal interface UserDao {
 
-    @Query("SELECT * FROM userentity")
+    @Query("SELECT * FROM UserEntity")
     suspend fun getUsers(): List<UserEntity>
 
-    @Query("SELECT * FROM userentity LIMIT :limit OFFSET :offset")
+    @Query("SELECT * FROM UserEntity LIMIT :limit OFFSET :offset")
     suspend fun getUsersQuantity(limit: Int, offset: Int): List<UserEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

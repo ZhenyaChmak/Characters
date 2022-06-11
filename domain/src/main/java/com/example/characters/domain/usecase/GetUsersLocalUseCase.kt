@@ -7,11 +7,11 @@ class GetUsersLocalUseCase(
     private val usersLocalUseCase: UsersLocalRepository
 ) {
 
-    suspend operator fun invoke(): Result<List<User>> {
+    suspend operator fun invoke(): List<User> {
         return usersLocalUseCase.getUsers()
     }
 
-    suspend operator fun invoke(limit: Int, offset: Int): Result<List<User>> {
+    suspend operator fun invoke(limit: Int, offset: Int): List<User> {
         return usersLocalUseCase.getUsersQuantity(limit, offset)
     }
 

@@ -1,11 +1,14 @@
 package com.example.characters.model
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.characters.domain.model.LoadState
 import com.example.characters.domain.model.User
 import com.example.characters.domain.usecase.GetUsersLocalUseCase
 import com.example.characters.domain.usecase.GetUsersRemoteUseCase
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
 class UserListViewModel(
     private val remoteUseCase: GetUsersRemoteUseCase,
@@ -18,74 +21,75 @@ class UserListViewModel(
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
+    private val _nextDetails = MutableSharedFlow<User>(
+        extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+    val nextDetails = _nextDetails.asSharedFlow()
+
     private var isLoading = false
     private var currentPage = 1
+
+    fun getNextDetails(user: User) = viewModelScope
+        .launch {
+            _nextDetails.tryEmit(user)
+        }
 
     fun onLoadMore() {
         loadSharedFlow.tryEmit(LoadState.LOAD)
     }
 
-    fun onRefresh() {
-        loadSharedFlow.tryEmit(LoadState.REFRESH)
+    fun onRefresh(): Boolean {
+        return loadSharedFlow.tryEmit(LoadState.REFRESH)
     }
 
-    fun getData(): Flow<List<User>> = flow<List<User>> {
-        remoteUseCase()
-            .fold(
-                onSuccess = {
-
-                },
-                onFailure = {
+    val getData =
+        loadSharedFlow
+            .onEach {
+                if (it == LoadState.REFRESH) {
+                    currentPage = 0
+                    isLoading = true
                 }
-            )
-    }
-        .onStart {
-            emit(remoteUseCase.invoke().getOrDefault(emptyList()))
-        }
-
-    enum class LoadState {
-        LOAD, REFRESH
-    }
+                if (it == LoadState.LOAD)
+                    isLoading = true
+            }
+            .filter { isLoading }
+            .map {
+                remoteUseCase()
+                    .fold(
+                        onSuccess = { list ->
+                            localUseCase(list)
+                            currentPage++
+                            localUseCase(currentPage * PAGE_SIZE, 0)
+                        },
+                        onFailure = {
+                            emptyList()
+                        }
+                    )
+            }
+            .onEach {
+                loadSharedFlow.tryEmit(LoadState.NOT_LOAD)
+                isLoading = false
+            }
+            .onStart {
+                if ((localUseCase(currentPage * PAGE_SIZE, 0)).isEmpty()) {
+                    remoteUseCase()
+                        .fold(onSuccess = {
+                            localUseCase(it)
+                            emit(localUseCase(currentPage * PAGE_SIZE, 0))
+                            it
+                        },
+                            onFailure = {
+                                emit(emptyList())
+                            })
+                } else {
+                    emit(localUseCase(currentPage * PAGE_SIZE, 0))
+                }
+            }
 
     companion object {
         private const val PAGE_SIZE = 10
     }
 }
-
-/*fun getData(): Flow<List<User>> {
-    return loadSharedFlow
-        .filter { !isLoading }
-        .onEach {
-            if (it == LoadState.REFRESH) {
-                currentPage = 1
-            }
-            isLoading = true
-        }
-        .map {
-            getUsersUseCase()
-                .fold(
-                    onSuccess = {
-                        userLocalUseCase.iasd(it)
-                      //  userDao.insertUser(it)
-                        currentPage++
-                        userLocalUseCase(currentPage * PAGE_SIZE, 0)
-                      //  userDao.getUsersQuantity(currentPage * PAGE_SIZE, 0)
-                    },
-                    onFailure = {
-                        userLocalUseCase(currentPage * PAGE_SIZE, 0)
-                      //  userDao.getUsersQuantity(currentPage * PAGE_SIZE, 0)
-                    }
-                )
-        }
-        .onEach {
-            isLoading = false
-
-        }
-        .onStart {
-            emit(userDao.getUsersQuantity(currentPage * PAGE_SIZE, 0))
-        }
-}*/
-
 
 
 

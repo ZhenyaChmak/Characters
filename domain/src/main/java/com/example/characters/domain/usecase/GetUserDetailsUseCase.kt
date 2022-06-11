@@ -7,8 +7,8 @@ class GetUserDetailsUseCase(
     private val userDetailsRepository: UserDetailsRepository
 ) {
 
-    suspend operator fun invoke(id: Int): Result<UserDetails> {
-        return userDetailsRepository.getUserDetails(id)
+    suspend operator fun invoke(userId: Int): Result<UserDetails> {
+        return userDetailsRepository.getUserDetails(userId)
     }
 
 }

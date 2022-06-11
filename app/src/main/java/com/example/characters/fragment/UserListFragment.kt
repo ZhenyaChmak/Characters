@@ -1,5 +1,6 @@
 package com.example.characters.fragment
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,6 +10,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.characters.R
 import com.example.characters.adapter.UserAdapter
 import com.example.characters.databinding.FragmentListUsersBinding
 import com.example.characters.decoration.addDecorationUser
@@ -27,12 +29,7 @@ class UserListFragment : Fragment() {
     private val adapter by lazy {
         UserAdapter(requireContext())
         {
-            findNavController().navigate(
-                UserListFragmentDirections.toUserDetails(
-                    it.id,
-                    it.name
-                )
-            )
+            viewModel.getNextDetails(it)
         }
     }
 
@@ -62,21 +59,34 @@ class UserListFragment : Fragment() {
                 }
 
             swipeRefresh.setOnRefreshListener {
-                viewModel.onRefresh()
-                swipeRefresh.isRefreshing = false
+                swipeRefresh.isRefreshing = !(viewModel.onRefresh())
             }
 
-            viewModel.getData().onEach { list ->
-                adapter.submitList(list.map {
-                    PageItem.Element(it)
-                } )
-            }.launchIn(viewLifecycleOwner.lifecycleScope)
+            viewModel
+                .nextDetails
+                .onEach {
+                    findNavController().navigate(
+                        UserListFragmentDirections.toUserDetails(
+                            it.id, it.name
+                        )
+                    )
+                }.launchIn(viewLifecycleOwner.lifecycleScope)
 
-            /*viewModel.getData().onEach { list ->
-                adapter.submitList(list.map {
-                    PageItem.Element(it)
-                } + PageItem.Loading)
-            }.launchIn(viewLifecycleOwner.lifecycleScope)*/
+            viewModel
+                .getData
+                .onEach { list ->
+                    if (list.isEmpty()) {
+                        AlertDialog.Builder(requireContext())
+                            .setMessage(R.string.is_no_internet)
+                            .show()
+                    } else {
+                        adapter.submitList(
+                            list.map {
+                                PageItem.Element(it)
+                            } + PageItem.Loading)
+                    }
+                }.launchIn(viewLifecycleOwner.lifecycleScope)
+
         }
     }
 

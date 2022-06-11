@@ -10,28 +10,24 @@ internal class UsersLocalRepositoryImpl(
     private val userDao: UserDao
 ) : UsersLocalRepository {
 
-    override suspend fun getUsers(): Result<List<User>> {
-        return runCatching {
-            userDao.getUsers()
-        }.map {
-            it.toDomainModel()
-        }
+    override suspend fun getUsers(): List<User> {
+        return userDao.getUsers()
+            .map {
+                it.toDomainModel()
+            }
     }
 
-    override suspend fun getUsersQuantity(limit: Int, offset: Int): Result<List<User>> {
-        return runCatching {
-            userDao.getUsersQuantity(limit, offset)
-        }.map {
-            it.toDomainModel()
-        }
+    override suspend fun getUsersQuantity(limit: Int, offset: Int): List<User> {
+        return userDao.getUsersQuantity(limit, offset)
+            .map {
+                it.toDomainModel()
+            }
     }
 
     override suspend fun insertUser(user: List<User>) {
-        runCatching {
-            userDao.insertUser(user.map {
-                it.toUserEntity()
-            })
-        }
+        userDao.insertUser(user.map {
+            it.toUserEntity()
+        })
     }
 
 }

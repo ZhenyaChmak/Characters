@@ -23,7 +23,7 @@ class UserDetailsFragment : Fragment() {
     private var _binding: FragmentUserDetailsBinding? = null
     private val binding get() = requireNotNull(_binding)
 
-    private val viewModel by viewModel<UserDetailsViewModel>{
+    private val viewModel by viewModel<UserDetailsViewModel> {
         parametersOf(args.userId)
     }
 
@@ -44,27 +44,27 @@ class UserDetailsFragment : Fragment() {
 
         addCustomToolbar(args.userName)
 
-       // viewModel.onLoadMoreDetails(args.userId)
-
-        viewModel
-            .dataFlow
-            .onEach {
-                it.fold(
-                    onSuccess = { user ->
-                        binding.nameDetails.text = user.name
-                        binding.userPhotoDetails.load(user.userPhoto[0])
-                        binding.pageHttp.text = user.pageHttp
-                    },
-                    onFailure = {
-                        AlertDialog.Builder(requireContext())
-                            .setMessage(R.string.is_no_internet)
-                            .setCancelable(false)
-                            .setPositiveButton(R.string.ok) { _, _ -> findNavController().navigateUp() }
-                            .show()
-                    }
-                )
-            }
-            .launchIn(viewLifecycleOwner.lifecycleScope)
+        with(binding) {
+            viewModel
+                .dataFlow
+                .onEach {
+                    it.fold(
+                        onSuccess = { user ->
+                            nameDetails.text = user.name
+                            userPhotoDetails.load(user.userPhoto[0])
+                            pageHttp.text = user.pageHttp
+                        },
+                        onFailure = {
+                            AlertDialog.Builder(requireContext())
+                                .setMessage(R.string.is_no_internet)
+                                .setCancelable(false)
+                                .setPositiveButton(R.string.ok) { _, _ -> findNavController().navigateUp() }
+                                .show()
+                        }
+                    )
+                }
+                .launchIn(viewLifecycleOwner.lifecycleScope)
+        }
     }
 
     private fun addCustomToolbar(name: String) {
